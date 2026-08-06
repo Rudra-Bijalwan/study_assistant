@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    pass
+    return render_template("index.html")
 
 
 @app.route('/login')
@@ -15,6 +15,6 @@ def login():
     pass
 
 
-@app.route('/signup')
-def signup():
+@app.route('/register')
+def register():
     pass
