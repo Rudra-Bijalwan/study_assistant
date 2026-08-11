@@ -1,17 +1,28 @@
+import os
+from dotenv import load_dotenv
 from flask import Flask
-from flask import redirect, render_template, request
+from flask import redirect, render_template, request, url_for
 from extensions import db
-from flask_login import UserMixin
+from flask_login import LoginManager
+from forms import RegisterForm, LoginForm
+from models import User, Subject, Upload, Summary, Flashcard, FlashcardReview
+
+load_dotenv()
+
+login_manager = LoginManager()
+@login_manager.user_loader
+def load_user(user_id):
+    return db.session.get(User, int(user_id))
 
 app = Flask(__name__)
 
-app.config['SECRET_KEY'] = 'very_secret@8'
+# configuration
+app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db.init_app(app)
-
-import models
+login_manager.init_app(app)
 
 
 @app.route('/')
