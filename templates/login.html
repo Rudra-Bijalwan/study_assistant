@@ -5,6 +5,13 @@ Login
 {% endblock %}
 
 {% block main %}
-<h1>Welcome!</h1>
-<p>This is the login page.</p>
+<h1>Login</h1>
+
+<h3> {{ message }}</h3>
+<form method="post" action="{{ url_for('login') }}">
+    {{form.hidden_tag()}}
+    {{form.username}}
+    {{form.password}}
+    {{form.submit}}
+</form>
 {% endblock %}

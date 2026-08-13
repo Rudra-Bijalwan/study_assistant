@@ -5,6 +5,12 @@ Register
 {% endblock %}
 
 {% block main %}
-<h1>Welcome!</h1>
-<p>This is the register page.</p>
+<h1>Register</h1>
+
+<form method="post" action="{{ url_for('register') }}">
+    {{form.hidden_tag()}}
+    {{form.username}}
+    {{form.password}}
+    {{form.submit}}
+</form>
 {% endblock %}
