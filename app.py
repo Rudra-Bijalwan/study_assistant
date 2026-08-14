@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from flask import Flask
 from flask import redirect, render_template, request, url_for
 from extensions import db
-from flask_login import LoginManager, login_required, login_user, logout_user
+from flask_login import LoginManager, login_required, login_user, logout_user, current_user
 from forms import RegisterForm, LoginForm
 from models import User, Subject, Upload, Summary, Flashcard, FlashcardReview
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -35,6 +35,9 @@ def home():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+
     form = LoginForm()
 
     # when valid form submitted
@@ -66,8 +69,10 @@ def logout():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    
     form = RegisterForm()
-
     # when valid form submitted
     if form.validate_on_submit():
         username = form.username.data
@@ -79,7 +84,6 @@ def register():
         db.session.commit()
 
         return redirect(url_for("login"))
-
 
     return render_template("register.html", form=form)
 
