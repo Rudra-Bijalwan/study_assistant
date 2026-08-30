@@ -4,14 +4,28 @@
 Login
 {% endblock %}
 
-{% block main %}
+{% block header %}
 <h1>Login</h1>
+{% endblock %}
 
-<h3> {{ message }}</h3>
-<form method="post" action="{{ url_for('login') }}">
-    {{form.hidden_tag()}}
-    {{form.username}}
-    {{form.password}}
-    {{form.submit}}
-</form>
+{% block main %}
+
+<div class="card" style="width: 400px;">
+    <h3> {{ message }}</h3>
+    <form method="post" action="{{ url_for('login') }}">
+    
+        {{form.hidden_tag()}}
+        <div class="mb-3"> 
+            {{ form.username(class="form-control mx-auto") }} 
+        </div>
+    
+        <div class="mb-3"> 
+            {{ form.password(class="form-control mx-auto") }}
+        </div>
+    
+        <div class="text-center">
+            {{ form.submit(class="btn btn-primary") }} 
+        </div>
+    </form>
+</div>
 {% endblock %}

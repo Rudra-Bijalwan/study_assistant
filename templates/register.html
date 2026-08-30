@@ -4,14 +4,32 @@
 Register
 {% endblock %}
 
-{% block main %}
+{% block header %}
 <h1>Register</h1>
+{% endblock %}
 
-<form method="post" action="{{ url_for('register') }}">
-    {{form.hidden_tag()}}
-    {{form.username}}
-    {{form.password}}
-    {{form.confirm_password}}
-    {{form.submit}}
-</form>
+{% block main %}
+
+<div class="card" style="width: 400px;">
+    <form method="post" action="{{ url_for('register') }}">
+    
+        {{form.hidden_tag()}}
+        <div class="mb-3"> 
+            {{ form.username(class="form-control mx-auto") }} 
+        </div>
+    
+        <div class="mb-3"> 
+            {{ form.password(class="form-control mx-auto") }}
+        </div>
+
+        <div class="mb-3"> 
+            {{ form.confirm_password(class="form-control mx-auto") }}
+        </div>
+    
+        <div class="text-center">
+            {{ form.submit(class="btn btn-primary") }} 
+        </div>
+    </form>
+</div>
+
 {% endblock %}
