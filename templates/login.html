@@ -27,5 +27,9 @@ Login
             {{ form.submit(class="btn btn-primary") }} 
         </div>
     </form>
+    <h6 class="text-center">
+        New user? 
+        <a href="{{url_for('register')}}">Register instead</a>
+    </h6>
 </div>
 {% endblock %}

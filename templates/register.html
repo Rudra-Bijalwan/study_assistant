@@ -30,6 +30,10 @@ Register
             {{ form.submit(class="btn btn-primary") }} 
         </div>
     </form>
+    <h6 class="text-center">
+        Already registered?
+        <a href="{{url_for('login')}}">Login instead</a>
+    </h6>
 </div>
 
 {% endblock %}
