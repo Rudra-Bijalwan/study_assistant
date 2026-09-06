@@ -6,6 +6,15 @@ Home
 
 {% block main %}
 <h1>Welcome!</h1>
-<p>This is the homepage.</p>
-<a href="{{ url_for('logout') }}">Logout</a>
+<div class="text-center">
+    <a href="/newsubject">
+        <button type="button" class="btn btn-primary btn-lg">Create a new subject</button>
+    </a>
+    <a href="/subjects">
+        <button type="button" class="btn btn-primary btn-lg">Select subject</button>
+    </a>
+    <a href="{{ url_for('logout') }}">
+        <button type="button" class="btn btn-primary">Logout</button>
+    </a>
+</div>
 {% endblock %}

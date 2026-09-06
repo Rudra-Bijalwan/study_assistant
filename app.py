@@ -30,6 +30,7 @@ def load_user(user_id):
 @app.route('/')
 @login_required
 def home():
+
     return render_template("home.html")
 
 
@@ -86,6 +87,18 @@ def register():
         return redirect(url_for("login"))
 
     return render_template("register.html", form=form)
+
+
+@app.route('/subjects')
+def subjects():
+
+    return render_template("subjects.html")
+
+
+@app.route('/newsubject')
+def newsubject():
+
+    return render_template("newsubject.html")
 
 
 if __name__ == "__main__":
