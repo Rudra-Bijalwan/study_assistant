@@ -7,10 +7,10 @@ Home
 {% block main %}
 <h1>Welcome!</h1>
 <div class="text-center">
-    <a href="/newsubject">
+    <a href="{{ url_for('newsubject') }}">
         <button type="button" class="btn btn-primary btn-lg">Create a new subject</button>
     </a>
-    <a href="/subjects">
+    <a href="{{ url_for('subjects') }}">
         <button type="button" class="btn btn-primary btn-lg">Select subject</button>
     </a>
     <a href="{{ url_for('logout') }}">

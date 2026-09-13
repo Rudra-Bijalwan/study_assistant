@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 from flask import Flask
-from flask import redirect, render_template, request, url_for
+from flask import redirect, render_template, request, url_for, abort
 from extensions import db
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user
 from forms import RegisterForm, LoginForm, SubjectCreate
@@ -92,8 +92,13 @@ def register():
 @app.route('/subjects')
 @login_required
 def subjects():
+    subjects = db.session.execute(
+        db.select(Subject.name, Subject.id).where(
+            Subject.user_id == current_user.id,
+        )
+    ).all()
 
-    return render_template("subjects.html")
+    return render_template("subjects.html", subjects=subjects)
 
 
 @app.route('/newsubject', methods=['GET', 'POST'])
@@ -117,10 +122,16 @@ def newsubject():
 @app.route("/subjects/<int:subject_id>")
 @login_required
 def subject(subject_id):
+    subject = db.session.scalar(
+        db.select(Subject).where(
+            Subject.id == subject_id,
+            Subject.user_id == current_user.id
+        ))
 
-    return render_template("subject.html")
+    if subject is None:
+        abort(404)
 
-
+    return render_template("subject.html", subject=subject)
 
 if __name__ == "__main__":
     app.run(debug=True)

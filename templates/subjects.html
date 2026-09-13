@@ -5,5 +5,11 @@ Subjects
 {% endblock %}
 
 {% block main %}
-<h1>Welcome!</h1>
+<div class="text-center">
+    {% for subject in subjects%}
+        <a href="{{ url_for('subject', subject_id=subject.id) }}">
+            <button type="button" class="btn btn-primary btn-lg">{{ subject.name }}</button>
+        </a>
+    {%endfor%}
+</div>
 {% endblock %}
