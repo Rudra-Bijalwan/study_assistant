@@ -4,7 +4,7 @@ from flask import Flask
 from flask import redirect, render_template, request, url_for
 from extensions import db
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user
-from forms import RegisterForm, LoginForm
+from forms import RegisterForm, LoginForm, SubjectCreate
 from models import User, Subject, Upload, Summary, Flashcard, FlashcardReview
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -90,15 +90,36 @@ def register():
 
 
 @app.route('/subjects')
+@login_required
 def subjects():
 
     return render_template("subjects.html")
 
 
-@app.route('/newsubject')
+@app.route('/newsubject', methods=['GET', 'POST'])
+@login_required
 def newsubject():
+    form = SubjectCreate()
 
-    return render_template("newsubject.html")
+    # when valid form submitted
+    if form.validate_on_submit():
+        subject_name = form.subject_name.data
+        user_id = current_user.id
+        new_subject = Subject(name=subject_name, user_id=user_id)
+        db.session.add(new_subject)
+        db.session.commit()
+
+        return redirect(url_for("subject", subject_id=new_subject.id))
+    
+    return render_template("newsubject.html", form=form)
+
+
+@app.route("/subjects/<int:subject_id>")
+@login_required
+def subject(subject_id):
+
+    return render_template("subject.html")
+
 
 
 if __name__ == "__main__":

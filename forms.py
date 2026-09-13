@@ -37,3 +37,9 @@ class LoginForm(FlaskForm):
      render_kw={"placeholder": "Password"})
     
     submit = SubmitField("Login")
+
+
+class SubjectCreate(FlaskForm):
+    subject_name = StringField(validators=[InputRequired(), Length(min=2, max=20)],
+        render_kw={"placeholder": "Subject Name"})
+    submit = SubmitField("Submit")
