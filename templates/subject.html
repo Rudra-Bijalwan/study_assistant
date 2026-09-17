@@ -1,9 +1,22 @@
 {% extends "layout.html" %}
 
 {% block title %}
-Subject
+{{ subject.name }}
 {% endblock %}
 
 {% block main %}
-
+<div class="text-center">
+    <a href="{{ url_for('todolist') }}">
+        <button type="button" class="btn btn-primary btn-lg">To-Do List</button>
+    </a>
+    <a href="{{ url_for('summarizetext') }}">
+        <button type="button" class="btn btn-primary btn-lg">Summarize Text</button>
+    </a>
+    <a href="{{ url_for('flashcardgenerator') }}">
+        <button type="button" class="btn btn-primary btn-lg">Flashcard Generator</button>
+    </a>
+    <a href="{{ url_for('logout') }}">
+        <button type="button" class="btn btn-primary">Logout</button>
+    </a>
+</div>
 {% endblock %}

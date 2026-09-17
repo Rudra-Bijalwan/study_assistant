@@ -92,6 +92,7 @@ def register():
 @app.route('/subjects')
 @login_required
 def subjects():
+    # get the subejcts to display for selection
     subjects = db.session.execute(
         db.select(Subject.name, Subject.id).where(
             Subject.user_id == current_user.id,
@@ -122,6 +123,7 @@ def newsubject():
 @app.route("/subjects/<int:subject_id>")
 @login_required
 def subject(subject_id):
+    # get the subject's data to pass to html
     subject = db.session.scalar(
         db.select(Subject).where(
             Subject.id == subject_id,
@@ -132,6 +134,24 @@ def subject(subject_id):
         abort(404)
 
     return render_template("subject.html", subject=subject)
+
+
+@app.route("/todolist")
+@login_required
+def todolist():
+    return render_template("todolist.html")
+
+
+@app.route("/summarizetext")
+@login_required
+def summarizetext():
+    return render_template("summarizetext.html")
+
+
+@app.route("/flashcardgenerator")
+@login_required
+def flashcardgenerator():
+    return render_template("flashcardgenerator.html")
 
 if __name__ == "__main__":
     app.run(debug=True)
