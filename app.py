@@ -136,21 +136,33 @@ def subject(subject_id):
     return render_template("subject.html", subject=subject)
 
 
-@app.route("/todolist")
+@app.route("/subjects/<int:subject_id>/todolist")
 @login_required
-def todolist():
-    return render_template("todolist.html")
+def todolist(subject_id):
+    return render_template("todolist.html", subject_id=subject_id)
 
 
-@app.route("/summarizetext")
+@app.route("/subjects/<int:subject_id>/todolist/settasks")
 @login_required
-def summarizetext():
+def settasks(subject_id):
+    return render_template("settasks.html")
+
+
+@app.route("/subjects/<int:subject_id>/todolist/viewtasks")
+@login_required
+def viewtasks(subject_id):
+    return render_template("viewtasks.html")
+
+
+@app.route("/subjects/<int:subject_id>/summarizetext")
+@login_required
+def summarizetext(subject_id):
     return render_template("summarizetext.html")
 
 
-@app.route("/flashcardgenerator")
+@app.route("/subjects/<int:subject_id>/flashcardgenerator")
 @login_required
-def flashcardgenerator():
+def flashcardgenerator(subject_id):
     return render_template("flashcardgenerator.html")
 
 if __name__ == "__main__":

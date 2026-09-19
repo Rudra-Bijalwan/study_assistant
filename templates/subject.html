@@ -6,13 +6,13 @@
 
 {% block main %}
 <div class="text-center">
-    <a href="{{ url_for('todolist') }}">
+    <a href="{{ url_for('todolist', subject_id=subject.id) }}">
         <button type="button" class="btn btn-primary btn-lg">To-Do List</button>
     </a>
-    <a href="{{ url_for('summarizetext') }}">
+    <a href="{{ url_for('summarizetext', subject_id=subject.id) }}">
         <button type="button" class="btn btn-primary btn-lg">Summarize Text</button>
     </a>
-    <a href="{{ url_for('flashcardgenerator') }}">
+    <a href="{{ url_for('flashcardgenerator', subject_id=subject.id) }}">
         <button type="button" class="btn btn-primary btn-lg">Flashcard Generator</button>
     </a>
     <a href="{{ url_for('logout') }}">
