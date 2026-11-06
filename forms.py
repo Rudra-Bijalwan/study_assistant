@@ -1,8 +1,9 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, Length, ValidationError, EqualTo
+from flask_login import current_user
 from extensions import db
-from models import User
+from models import User, Subject
 
 
 class RegisterForm(FlaskForm):
@@ -43,3 +44,14 @@ class SubjectCreate(FlaskForm):
     subject_name = StringField(validators=[InputRequired(), Length(min=2, max=20)],
         render_kw={"placeholder": "Subject Name"})
     submit = SubmitField("Submit")
+
+    def validate_subject_name(self, subject_name):
+        existing_subject = db.session.scalar(
+            db.select(Subject).where(
+                Subject.user_id == current_user.id,
+                db.func.lower(Subject.name) == subject_name.data.strip().lower()
+            )
+        )
+
+        if existing_subject:
+            raise ValidationError("You already have a subject with that name.")

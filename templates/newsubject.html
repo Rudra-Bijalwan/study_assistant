@@ -9,6 +9,9 @@ New Subject
     {{form.hidden_tag()}}
     <div class="mb-3"> 
         {{ form.subject_name(class="form-control mx-auto") }} 
+        {% for error in form.subject_name.errors %}
+            <p>{{ error }}</p>
+        {% endfor %}
     </div>
     <div class="text-center"> 
         {{ form.submit(class="btn btn-primary") }}

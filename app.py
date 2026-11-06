@@ -41,7 +41,7 @@ def login():
 
     form = LoginForm()
 
-    # when valid form submitted
+    # when valid form submitted 
     if form.validate_on_submit():
         user = db.session.scalar(
             db.select(User).where(User.username == form.username.data)
