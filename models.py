@@ -121,3 +121,19 @@ class FlashcardReview(db.Model):
         db.DateTime,
         server_default=db.func.current_timestamp()
     )
+
+
+class Task(db.Model):
+    __tablename__ = "tasks"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    subject_id = db.Column(
+        db.Integer,
+        db.ForeignKey("subjects.id"),
+        nullable=False
+    )
+
+    task = db.Column(db.Text, nullable=False)
+    due_date = db.Column(db.Date)
+    is_done = db.Column(db.Boolean, nullable=False, default=False)

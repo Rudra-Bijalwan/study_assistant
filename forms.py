@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
-from wtforms.validators import InputRequired, Length, ValidationError, EqualTo
+from wtforms import StringField, PasswordField, SubmitField, DateField
+from wtforms.validators import InputRequired, Length, ValidationError, EqualTo, Optional
 from flask_login import current_user
 from extensions import db
 from models import User, Subject
@@ -55,3 +55,10 @@ class SubjectCreate(FlaskForm):
 
         if existing_subject:
             raise ValidationError("You already have a subject with that name.")
+
+
+class TaskForm(FlaskForm):
+    task = StringField(validators=[InputRequired(), Length(min=2, max=30)],
+        render_kw={"placeholder": "Task"})
+    due_date = DateField(validators=[Optional()])
+    submit = SubmitField("Set Task")

@@ -5,5 +5,24 @@ Set Tasks
 {% endblock %}
 
 {% block main %}
+<h1>Set Tasks</h1>
+<div class="card" style="width: 400px;">
+    <h3> {{ message }}</h3>
+    <form method="post" action="{{ url_for('settasks', subject_id=subject_id) }}">
+    
+        {{form.hidden_tag()}}
+        <div class="mb-3"> 
+            {{ form.task(class="form-control mx-auto") }} 
+        </div>
+    
+        <div class="mb-3"> 
+            {{ form.due_date(class="form-control mx-auto") }}
+        </div>
+    
+        <div class="text-center">
+            {{ form.submit(class="btn btn-primary") }} 
+        </div>
+    </form>
+</div>
 
 {% endblock %}

@@ -4,8 +4,8 @@ from flask import Flask
 from flask import redirect, render_template, request, url_for, abort
 from extensions import db
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user
-from forms import RegisterForm, LoginForm, SubjectCreate
-from models import User, Subject, Upload, Summary, Flashcard, FlashcardReview
+from forms import RegisterForm, LoginForm, SubjectCreate, TaskForm
+from models import User, Subject, Upload, Summary, Flashcard, FlashcardReview, Task
 from werkzeug.security import generate_password_hash, check_password_hash
 
 load_dotenv()
@@ -142,10 +142,30 @@ def todolist(subject_id):
     return render_template("todolist.html", subject_id=subject_id)
 
 
-@app.route("/subjects/<int:subject_id>/todolist/settasks")
+@app.route("/subjects/<int:subject_id>/todolist/settasks", methods=['GET', 'POST'])
 @login_required
 def settasks(subject_id):
-    return render_template("settasks.html")
+    # make sure this subject belongs to the logged-in user
+    subject = db.session.scalar(
+        db.select(Subject).where(
+            Subject.id == subject_id,
+            Subject.user_id == current_user.id
+        ))
+    if subject is None:
+        abort(404)
+
+    form = TaskForm()
+    if form.validate_on_submit():
+        task = form.task.data.strip()
+        due_date = form.due_date.data
+        user_id = current_user.id
+        new_task = Task(task=task, due_date=due_date, subject_id=subject.id)
+        db.session.add(new_task)
+        db.session.commit()
+
+        return redirect(url_for("viewtasks", subject_id=subject.id))
+
+    return render_template("settasks.html", form=form, subject_id=subject.id)
 
 
 @app.route("/subjects/<int:subject_id>/todolist/viewtasks")
