@@ -171,7 +171,54 @@ def settasks(subject_id):
 @app.route("/subjects/<int:subject_id>/todolist/viewtasks")
 @login_required
 def viewtasks(subject_id):
-    return render_template("viewtasks.html")
+    # 404 unless this subject belongs to the logged-in user
+    subject = db.first_or_404(
+        db.select(Subject).where(
+            Subject.id == subject_id,
+            Subject.user_id == current_user.id
+        ))
+    
+    # get the tasks to display for selection
+    tasks = db.session.scalars(
+        db.select(Task)
+        .where(Task.subject_id == subject.id)
+        .order_by(Task.is_done, Task.due_date.is_(None), Task.due_date, Task.id)
+    ).all()
+    if tasks is None:
+        abort(404)
+
+    return render_template("viewtasks.html", tasks=tasks, subject=subject)
+
+
+@app.route("/subjects/<int:subject_id>/todolist/tasks/<int:task_id>/delete", methods=["POST"])
+@login_required
+def deletetask(subject_id, task_id):
+    task = db.first_or_404(
+        db.select(Task).join(Subject).where(
+            Task.id == task_id,
+            Task.subject_id == subject_id,
+            Subject.user_id == current_user.id
+        ))
+    db.session.delete(task)
+    db.session.commit()
+    return redirect(url_for("viewtasks", subject_id=subject_id))
+
+
+@app.route("/subjects/<int:subject_id>/todolist/tasks/<int:task_id>/toggle", methods=["POST"])
+@login_required
+def toggletask(subject_id, task_id):
+    # only finds the task if it belongs to a subject owned by this user
+    task = db.first_or_404(
+        db.select(Task).join(Subject).where(
+            Task.id == task_id,
+            Task.subject_id == subject_id,
+            Subject.user_id == current_user.id
+        ))
+
+    task.is_done = not task.is_done
+    db.session.commit()
+
+    return redirect(url_for("viewtasks", subject_id=subject_id))
 
 
 @app.route("/subjects/<int:subject_id>/summarizetext")
@@ -179,11 +226,6 @@ def viewtasks(subject_id):
 def summarizetext(subject_id):
     return render_template("summarizetext.html")
 
-
-@app.route("/subjects/<int:subject_id>/flashcardgenerator")
-@login_required
-def flashcardgenerator(subject_id):
-    return render_template("flashcardgenerator.html")
 
 if __name__ == "__main__":
     app.run(debug=True)
