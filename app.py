@@ -5,7 +5,7 @@ from flask import redirect, render_template, request, url_for, abort
 from extensions import db
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user
 from forms import RegisterForm, LoginForm, SubjectCreate, TaskForm
-from models import User, Subject, Upload, Summary, Flashcard, FlashcardReview, Task
+from models import User, Subject, Summary, Task
 from werkzeug.security import generate_password_hash, check_password_hash
 
 load_dotenv()

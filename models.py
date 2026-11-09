@@ -37,8 +37,8 @@ class Subject(db.Model):
     )
 
 
-class Upload(db.Model):
-    __tablename__ = "uploads"
+class Summary(db.Model):
+    __tablename__ = "summaries"
 
     id = db.Column(db.Integer, primary_key=True)
 
@@ -48,76 +48,13 @@ class Upload(db.Model):
         nullable=False
     )
 
+    source_text = db.Column(db.Text, nullable=False) 
+    
     title = db.Column(db.Text, nullable=False)
 
-    file_path = db.Column(
-        db.Text,
-        unique=True,
-        nullable=False
-    )
-
-    file_type = db.Column(db.Text, nullable=False)
-
-    uploaded_at = db.Column(
-        db.DateTime,
-        server_default=db.func.current_timestamp()
-    )
-
-    __table_args__ = (
-        db.UniqueConstraint("subject_id", "title"),
-    )
-
-
-class Summary(db.Model):
-    __tablename__ = "summaries"
-
-    id = db.Column(db.Integer, primary_key=True)
-
-    upload_id = db.Column(
-        db.Integer,
-        db.ForeignKey("uploads.id"),
-        nullable=False
-    )
-
     content = db.Column(db.Text, nullable=False)
 
     created_at = db.Column(
-        db.DateTime,
-        server_default=db.func.current_timestamp()
-    )
-
-
-class Flashcard(db.Model):
-    __tablename__ = "flashcards"
-
-    id = db.Column(db.Integer, primary_key=True)
-
-    upload_id = db.Column(
-        db.Integer,
-        db.ForeignKey("uploads.id"),
-        nullable=False
-    )
-
-    content = db.Column(db.Text, nullable=False)
-
-    created_at = db.Column(
-        db.DateTime,
-        server_default=db.func.current_timestamp()
-    )
-
-
-class FlashcardReview(db.Model):
-    __tablename__ = "flashcard_review"
-
-    id = db.Column(db.Integer, primary_key=True)
-
-    flashcard_id = db.Column(
-        db.Integer,
-        db.ForeignKey("flashcards.id"),
-        nullable=False
-    )
-
-    reviewed_at = db.Column(
         db.DateTime,
         server_default=db.func.current_timestamp()
     )

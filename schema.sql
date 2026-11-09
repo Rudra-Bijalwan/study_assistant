@@ -15,44 +15,27 @@ CREATE TABLE subjects (
     user_id INTEGER NOT NULL,
     name TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) references users(id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
     UNIQUE (user_id, name)
 );
 
 
-CREATE TABLE uploads (
+CREATE TABLE tasks (
     id INTEGER PRIMARY KEY,
     subject_id INTEGER NOT NULL,
-    title TEXT NOT NULL,
-    file_path TEXT UNIQUE NOT NULL,
-    file_type TEXT NOT NULL,
-    uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (subject_id) references subjects(id),
-    UNIQUE (subject_id, title)
+    task TEXT NOT NULL,
+    due_date DATE,
+    is_done BOOLEAN NOT NULL DEFAULT 0,
+    FOREIGN KEY (subject_id) REFERENCES subjects(id)
 );
 
 
 CREATE TABLE summaries (
     id INTEGER PRIMARY KEY,
-    upload_id INTEGER NOT NULL,
+    subject_id INTEGER NOT NULL,
+    source_text TEXT NOT NULL,
+    title TEXT NOT NULL,
     content TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (upload_id) references uploads(id)
-);
-
-
-CREATE TABLE flashcards (
-    id INTEGER PRIMARY KEY,
-    upload_id INTEGER NOT NULL,
-    content TEXT NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (upload_id) references uploads(id)
-);
-
-
-CREATE TABLE flashcard_review (
-    id INTEGER PRIMARY KEY,
-    flashcard_id INTEGER NOT NULL,
-    reviewed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (flashcard_id) references flashcards(id)
+    FOREIGN KEY (subject_id) REFERENCES subjects(id)
 );
