@@ -8,6 +8,7 @@ from forms import RegisterForm, LoginForm, SubjectCreate, TaskForm, SummaryForm
 from models import User, Subject, Summary, Task
 from werkzeug.security import generate_password_hash, check_password_hash
 from helpers import extract_text, summarize, SummaryError, get_user_subject
+from datetime import date
 
 load_dotenv()
 
@@ -32,8 +33,34 @@ def load_user(user_id):
 @app.route('/')
 @login_required
 def home():
+    today = date.today()
 
-    return render_template("home.html")
+    # tasks not yet done, across all of this user's subjects
+    pending = db.session.scalar(
+        db.select(db.func.count(Task.id))
+        .join(Subject, Task.subject_id == Subject.id)
+        .where(Subject.user_id == current_user.id, Task.is_done.is_(False))
+    )
+
+    # not done AND due before today (tasks without a due date are never overdue)
+    overdue = db.session.scalar(
+        db.select(db.func.count(Task.id))
+        .join(Subject, Task.subject_id == Subject.id)
+        .where(
+            Subject.user_id == current_user.id,
+            Task.is_done.is_(False),
+            Task.due_date < today
+        )
+    )
+
+    summary_count = db.session.scalar(
+        db.select(db.func.count(Summary.id))
+        .join(Subject, Summary.subject_id == Subject.id)
+        .where(Subject.user_id == current_user.id)
+    )
+
+    return render_template("home.html", pending=pending, overdue=overdue,
+                           summary_count=summary_count)
 
 
 @app.route('/login', methods=['GET', 'POST'])

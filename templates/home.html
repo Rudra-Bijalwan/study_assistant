@@ -5,7 +5,29 @@ Home
 {% endblock %}
 
 {% block main %}
-<h1>Welcome!</h1>
+<h1>Welcome, {{ current_user.username }}!</h1>
+
+<div class="row text-center mb-4" style="width: 100%; max-width: 700px;">
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="display-5">{{ pending }}</div>
+            <div class="text-muted">Tasks pending</div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="display-5 {{ 'text-danger' if overdue }}">{{ overdue }}</div>
+            <div class="text-muted">Tasks overdue</div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="display-5">{{ summary_count }}</div>
+            <div class="text-muted">Summaries saved</div>
+        </div>
+    </div>
+</div>
+
 <div class="text-center">
     <a href="{{ url_for('newsubject') }}">
         <button type="button" class="btn btn-primary btn-lg">Create a new subject</button>
