@@ -131,6 +131,21 @@ def subject(subject_id):
     return render_template("subject.html", subject=subject)
 
 
+@app.route("/subjects/<int:subject_id>/delete", methods=["POST"])
+@login_required
+def deletesubject(subject_id):
+    # 404 unless this subject belongs to the logged-in user
+    subject = get_user_subject(subject_id)
+
+    # delete the subject's data first, then the subject itself
+    db.session.execute(db.delete(Task).where(Task.subject_id == subject.id))
+    db.session.execute(db.delete(Summary).where(Summary.subject_id == subject.id))
+    db.session.delete(subject)
+    db.session.commit()
+
+    return redirect(url_for("subjects"))
+
+
 @app.route("/subjects/<int:subject_id>/todolist")
 @login_required
 def todolist(subject_id):
