@@ -5,5 +5,51 @@ Summarize Text
 {% endblock %}
 
 {% block main %}
+<h1>Summarize for {{ subject.name }}</h1>
 
+<div class="card" style="width: 500px;">
+    {% if error %}
+        <div class="text-danger text-center mb-2">{{ error }}</div>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data"
+          action="{{ url_for('summarizetext', subject_id=subject.id) }}">
+        {{ form.hidden_tag() }}
+
+        <div class="mb-3">
+            {{ form.title(class="form-control mx-auto") }}
+            {% for e in form.title.errors %}<p class="text-danger">{{ e }}</p>{% endfor %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.file(class="form-control mx-auto") }}
+            {% for e in form.file.errors %}<p class="text-danger">{{ e }}</p>{% endfor %}
+        </div>
+
+        <div class="text-center">
+            {{ form.submit(class="btn btn-primary") }}
+        </div>
+    </form>
+</div>
+
+<div class="card mt-3" style="width: 500px;">
+    <h5 class="text-center mt-2">Saved summaries</h5>
+    {% if summaries %}
+    <ul class="list-group">
+        {% for s in summaries %}
+        <li class="list-group-item">
+            <a href="{{ url_for('viewsummary', subject_id=subject.id, summary_id=s.id) }}">{{ s.title }}</a>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p class="text-center">No summaries yet.</p>
+    {% endif %}
+</div>
+
+<div class="text-center mt-3">
+    <a href="{{ url_for('subject', subject_id=subject.id) }}">
+        <button type="button" class="btn btn-secondary">Back</button>
+    </a>
+</div>
 {% endblock %}

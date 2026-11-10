@@ -4,9 +4,10 @@ from flask import Flask
 from flask import redirect, render_template, request, url_for, abort
 from extensions import db
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user
-from forms import RegisterForm, LoginForm, SubjectCreate, TaskForm
+from forms import RegisterForm, LoginForm, SubjectCreate, TaskForm, SummaryForm
 from models import User, Subject, Summary, Task
 from werkzeug.security import generate_password_hash, check_password_hash
+from helpers import extract_text, summarize, SummaryError, get_user_subject
 
 load_dotenv()
 
@@ -16,6 +17,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024   # 5 MB
 
 db.init_app(app)
 login_manager = LoginManager()
@@ -124,14 +126,7 @@ def newsubject():
 @login_required
 def subject(subject_id):
     # get the subject's data to pass to html
-    subject = db.session.scalar(
-        db.select(Subject).where(
-            Subject.id == subject_id,
-            Subject.user_id == current_user.id
-        ))
-
-    if subject is None:
-        abort(404)
+    subject = get_user_subject(subject_id)
 
     return render_template("subject.html", subject=subject)
 
@@ -146,13 +141,7 @@ def todolist(subject_id):
 @login_required
 def settasks(subject_id):
     # make sure this subject belongs to the logged-in user
-    subject = db.session.scalar(
-        db.select(Subject).where(
-            Subject.id == subject_id,
-            Subject.user_id == current_user.id
-        ))
-    if subject is None:
-        abort(404)
+    subject = get_user_subject(subject_id)
 
     form = TaskForm()
     if form.validate_on_submit():
@@ -171,13 +160,7 @@ def settasks(subject_id):
 @app.route("/subjects/<int:subject_id>/todolist/viewtasks")
 @login_required
 def viewtasks(subject_id):
-    # 404 unless this subject belongs to the logged-in user
-    subject = db.first_or_404(
-        db.select(Subject).where(
-            Subject.id == subject_id,
-            Subject.user_id == current_user.id
-        ))
-    
+    subject = get_user_subject(subject_id)
     # get the tasks to display for selection
     tasks = db.session.scalars(
         db.select(Task)
@@ -221,10 +204,74 @@ def toggletask(subject_id, task_id):
     return redirect(url_for("viewtasks", subject_id=subject_id))
 
 
-@app.route("/subjects/<int:subject_id>/summarizetext")
+@app.route("/subjects/<int:subject_id>/summarizetext", methods=['GET', 'POST'])
 @login_required
 def summarizetext(subject_id):
-    return render_template("summarizetext.html")
+    subject = get_user_subject(subject_id)
+
+    form = SummaryForm()
+    error = None
+
+    if form.validate_on_submit():
+        try:
+            text = extract_text(form.file.data)
+            content = summarize(text)
+        except SummaryError as e:
+            error = str(e)
+        else:
+            new_summary = Summary(
+                subject_id=subject.id,
+                title=form.title.data.strip(),
+                source_text=text,
+                content=content
+            )
+            db.session.add(new_summary)
+            db.session.commit()
+
+            return redirect(url_for("viewsummary", subject_id=subject.id, summary_id=new_summary.id))
+
+    # saved summaries for this subject, newest first
+    summaries = db.session.scalars(
+        db.select(Summary)
+        .where(Summary.subject_id == subject.id)
+        .order_by(Summary.created_at.desc(), Summary.id.desc())
+    ).all()
+
+    return render_template("summarizetext.html", form=form, subject=subject,
+                           summaries=summaries, error=error)
+
+
+@app.route("/subjects/<int:subject_id>/summaries/<int:summary_id>")
+@login_required
+def viewsummary(subject_id, summary_id):
+    summary = db.first_or_404(
+        db.select(Summary).join(Subject).where(
+            Summary.id == summary_id,
+            Summary.subject_id == subject_id,
+            Subject.user_id == current_user.id
+        ))
+
+    return render_template("viewsummary.html", summary=summary, subject_id=subject_id)
+
+
+@app.route("/subjects/<int:subject_id>/summaries/<int:summary_id>/delete", methods=["POST"])
+@login_required
+def deletesummary(subject_id, summary_id):
+    summary = db.first_or_404(
+        db.select(Summary).join(Subject).where(
+            Summary.id == summary_id,
+            Summary.subject_id == subject_id,
+            Subject.user_id == current_user.id
+        ))
+    db.session.delete(summary)
+    db.session.commit()
+
+    return redirect(url_for("summarizetext", subject_id=subject_id))
+
+
+@app.errorhandler(413)
+def file_too_large(e):
+    return "That file is too large. The maximum size is 5 MB.", 413
 
 
 if __name__ == "__main__":

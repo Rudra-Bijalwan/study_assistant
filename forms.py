@@ -4,6 +4,7 @@ from wtforms.validators import InputRequired, Length, ValidationError, EqualTo, 
 from flask_login import current_user
 from extensions import db
 from models import User, Subject
+from flask_wtf.file import FileField, FileRequired, FileAllowed
 
 
 class RegisterForm(FlaskForm):
@@ -62,3 +63,13 @@ class TaskForm(FlaskForm):
         render_kw={"placeholder": "Task"})
     due_date = DateField(validators=[Optional()])
     submit = SubmitField("Set Task")
+
+
+class SummaryForm(FlaskForm):
+    title = StringField(validators=[InputRequired(), Length(min=2, max=60)],
+        render_kw={"placeholder": "Title (e.g. Chapter 3 notes)"})
+    file = FileField(validators=[
+        FileRequired(message="Please choose a file."),
+        FileAllowed(["pdf", "txt"], "Only PDF or TXT files are allowed.")
+    ])
+    submit = SubmitField("Summarize")
