@@ -1,5 +1,4 @@
 # Study Desk
-Demo video url: ?
 
 ## Tech Stack
 * HTML
