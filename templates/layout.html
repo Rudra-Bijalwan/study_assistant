@@ -17,7 +17,9 @@
     <div>
         <a class="btn btn-outline-light btn-sm" href="{{ url_for('subjects') }}">My Subjects</a>
         <a class="btn btn-outline-light btn-sm" href="{{ url_for('newsubject') }}">New Subject</a>
-        <a class="btn btn-light btn-sm" href="{{ url_for('logout') }}">Logout</a>
+        <form method="post" action="{{ url_for('logout') }}" class="d-inline">
+            <button type="submit" class="btn btn-light btn-sm">Logout</button>
+        </form>
     </div>
     {% endif %}
 </nav>

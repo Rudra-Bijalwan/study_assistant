@@ -12,9 +12,9 @@
     <a href="{{ url_for('summarizetext', subject_id=subject.id) }}">
         <button type="button" class="btn btn-primary btn-lg">Summarize Text</button>
     </a>
-    <a href="{{ url_for('logout') }}">
-        <button type="button" class="btn btn-primary">Logout</button>
-    </a>
+    <form method="post" action="{{ url_for('logout') }}" class="d-inline">
+        <button type="submit" class="btn btn-primary">Logout</button>
+    </form>
     <form method="post" class="d-inline"
         action="{{ url_for('deletesubject', subject_id=subject.id) }}"
         onsubmit="return confirm('Delete {{ subject.name }} and all its tasks and summaries? This cannot be undone.');">

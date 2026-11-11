@@ -8,8 +8,10 @@ Demo video url: ?
 * Flask, Flask-Login, Flask-WTF
 * SQLite3
 * Google Gemini API
-* Bootstrap  5
-* Pypdf
+* Bootstrap 5
+* pypdf
+* SQLAlchemy (via Flask_SQLAlchemy)
+* A small amount of inline JavaScript (task checkbox, delete confirmation)
 
 ## The Idea
 Study Desk is a web app that keeps a student’s study work in one place. Each subject has its own to-do list with due dates and its own saved summaries, so nothing has to be hunted down when it’s time to work. Users can upload a PDF or text file, and the app generates a short summary of it using Google’s Gemini API. A dashboard on the home page shows pending tasks, overdue tasks and the number of summaries saved.
@@ -22,3 +24,115 @@ Study Desk is a web app that keeps a student’s study work in one place. Each s
 * **Saved summaries:** reopen or delete any summary from its subject at any time.
 * **Dashboard:** the home page shows the number of pending tasks, overdue tasks and saved summaries across all subjects.
 * **Delete a subject:** removes the subject along with its tasks and summaries.
+
+## Project Structure
+* **`app.py`:** the Flask application. It holds the configuration and every route: registration, login and logout, the dashboard, subjects, tasks and summaries. Each route that touches subject data first checks that the subject belongs to the logged-in user.
+* **`extensions.py`:** creates the shared SQLAlchemy `db` object. It lives in its own file so that `models.py` and `forms.py` can import it without circular imports.
+* **`models.py`:** the SQLAlchemy models (`User`, `Subject`, `Task`, `Summary`), which mirror the tables in `schema.sql`.
+* **`forms.py`:** the Flask-WTF forms for registration, login, creating subjects, adding tasks and uploading a file to summarize. It also holds the custom validators, such as rejecting a username that already exists or a subject name the user already has.
+* **`helpers.py`:** the logic that is not tied to a page. `extract_text` reads text from an uploaded PDF or TXT file, `summarize` sends it to the Gemini API, and `SummaryError` carries error messages that are safe to show the user.
+* **`schema.sql`:** the SQL used to create the SQLite database, with all four tables and their constraints.
+* **`requirements.txt`:** the Python packages the project needs.
+* **`static/`:** `styles.css` holds the custom styling on top of Bootstrap. `script.js` is currently empty and reserved for future client-side code.
+* **`templates/`:** the Jinja pages. `layout.html` is the base for pages after login, with the navigation bar and footer. `auth_layout.html` is the base for the login and register pages. Every other template extends one of those two.
+
+## Database Design
+The app uses SQLite, with the tables defined in `schema.sql` and mirrored by the SQLAlchemy models in `models.py`. There are four tables:
+
+```
+users (id, username, password_hash, created_at)
+  └── subjects (id, user_id, name, created_at)
+        ├── tasks (id, subject_id, task, due_date, is_done)
+        └── summaries (id, subject_id, title, source_text, content, created_at)
+```
+
+* **`users`** stores one row per account. Only a hash of the password is stored, never the password itself. A unique index on `username` stops two accounts from sharing a name.
+* **`subjects`** belongs to one user through `user_id`. A `UNIQUE (user_id, name)` constraint means one user cannot have two subjects with the same name, while two different users can each have a subject called "Maths".
+* **`tasks`** belongs to one subject through `subject_id`. `due_date` is optional, so it can be empty. `is_done` is a boolean, which SQLite stores as 0 or 1 and defaults to 0.
+* **`summaries`** belongs to one subject through `subject_id`. It stores the title the user chose, the extracted text that was summarized (`source_text`), and the generated summary (`content`).
+
+### Why tasks and summaries link to subjects, not users
+Tasks and summaries only store `subject_id`. The owner is found by following the chain from the subject to its `user_id`. Storing the user on every task as well would save the same fact in two places, and the two could drift out of sync. The cost is a join whenever the app needs a user's data across all subjects. The dashboard counts, for example, join `tasks` or `summaries` to `subjects` and filter on `subjects.user_id`.
+
+### Constraints the database cannot fully enforce
+* The unique constraints on `username` and on `(user_id, name)` are case-sensitive, so "Maths" and "maths" would both be allowed. The `SubjectCreate` form checks names case-insensitively before the insert, so users get a clear message and not a database error.
+* SQLite does not enforce foreign keys unless asked to, so deleting a subject alone would leave its tasks and summaries behind as orphaned rows. The delete route therefore removes the tasks and summaries first, and then the subject.
+
+## Design Decisions
+### Why are passwords hashed, and not directly stored in database
+Passwords are never stored directly. Werkzeug’s `generate_password_hash` turns each password into a salted hash, and only that hash is saved in `users.password_hash`. At login, `check_password_hash` compares the entered password against the stored hash. Hashing can’t be reversed, so even someone with access to the database can’t read the original passwords.
+
+### Ownership Checks
+Every subject, task and summary route confirms the data belongs to the logged-in user, so another user’s URL gives a 404.
+
+### Why uploaded files are not stored
+The uploaded PDF or TXT file is read, its text is extracted, and the file is then discarded. Only the text is kept, in `summaries.source_text`. This avoids managing files on disk.
+
+### Text is extracted locally before sending to Gemini
+This is done to get control over the length and cost for API call. Also extracting the text is required for storing in `source_text` of the `summaries` table.
+
+### Why Upload limits
+To lower the cost of API call and limit the prompt sent to Gemini so that it doesn't take long to process the prompt.
+
+### Why SQLAlchemy
+SQLAlchemy is used to establish object relational mapping so as to keep the database part integrated within python itself. Each model is linked to the sqlite3 tables. 
+
+
+## Limitations
+* The app cannot process scanned pdfs or images.
+* Only the first 30,000 characters or 50 pages of a file are summarized.
+* Password rules are minimal.
+
+## Privacy and external services
+The uploaded text is sent to Google Gemini API. Google may use the uploaded text content to improve their services in the free models of API key.
+
+## How to Run
+
+Requires Python 3.14 or newer and a free Google Gemini API key.
+
+1. **Get the code and open the project folder.**
+   ```
+    git clone https://github.com/Rudra-Bijalwan/study_desk
+    cd study-desk
+   ```
+
+2. **Create and activate a virtual environment.**
+   ```
+   python3 -m venv .venv
+   source .venv/bin/activate
+   ```
+   On Windows (PowerShell), activate it with `.venv\Scripts\Activate.ps1` instead.
+
+3. **Install the dependencies.**
+   ```
+   pip install -r requirements.txt
+   ```
+
+4. **Create the database from the schema.**
+   ```
+   mkdir -p instance
+   sqlite3 instance/database.db < schema.sql
+   ```
+   If the `sqlite3` command is not installed, use Python instead:
+   ```
+   python -c "import sqlite3; c = sqlite3.connect('instance/database.db'); c.executescript(open('schema.sql').read()); c.commit()"
+   ```
+
+5. **Create a `.env` file** in the project folder with these three lines:
+   ```
+   SECRET_KEY=your_random_secret_here
+   GEMINI_API_KEY=your_gemini_key_here
+   GEMINI_MODEL=model_name_here
+   ```
+   * `SECRET_KEY` can be any long random string. One way to make one:
+     `python -c "import secrets; print(secrets.token_hex(32))"`
+   * `GEMINI_API_KEY` is a free key from Google AI Studio (aistudio.google.com).
+   * `GEMINI_MODEL` is the name of a Gemini "flash" model your key can use. Model names change over time, so check the current ones in Google AI Studio if a request fails with "model not found".
+
+6. **Start the app.**
+   ```
+   flask run
+   ```
+   Then open http://127.0.0.1:5000 in a browser, register an account and create a subject.
+
+The `.env` file and the `instance/` folder hold secrets and user data, so they are listed in `.gitignore` and are not part of the repository.

@@ -90,7 +90,7 @@ def login():
     return render_template("login.html", form=form)
 
 
-@app.route('/logout')
+@app.route('/logout', methods=['POST'])
 def logout():
     logout_user()
     return redirect(url_for('login'))
@@ -176,6 +176,7 @@ def deletesubject(subject_id):
 @app.route("/subjects/<int:subject_id>/todolist")
 @login_required
 def todolist(subject_id):
+    subject = get_user_subject(subject_id)
     return render_template("todolist.html", subject_id=subject_id)
 
 
