@@ -1,5 +1,8 @@
 # Study Desk
 
+## The Idea
+Study Desk is a web app that keeps a student’s study work in one place. Each subject has its own to-do list with due dates and its own saved summaries, so nothing has to be hunted down when it’s time to work. Users can upload a PDF or text file, and the app generates a short summary of it using Google’s Gemini API. A dashboard on the home page shows pending tasks, overdue tasks and the number of summaries saved.
+
 ## Tech Stack
 * HTML
 * CSS
@@ -11,9 +14,6 @@
 * pypdf
 * SQLAlchemy (via Flask_SQLAlchemy)
 * A small amount of inline JavaScript (task checkbox, delete confirmation)
-
-## The Idea
-Study Desk is a web app that keeps a student’s study work in one place. Each subject has its own to-do list with due dates and its own saved summaries, so nothing has to be hunted down when it’s time to work. Users can upload a PDF or text file, and the app generates a short summary of it using Google’s Gemini API. A dashboard on the home page shows pending tasks, overdue tasks and the number of summaries saved.
 
 ## Features
 * **User accounts:** register with a username and password, then log in and out.
