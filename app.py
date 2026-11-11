@@ -212,7 +212,7 @@ def viewtasks(subject_id):
     if tasks is None:
         abort(404)
 
-    return render_template("viewtasks.html", tasks=tasks, subject=subject)
+    return render_template("viewtasks.html", tasks=tasks, subject=subject, today=date.today())
 
 
 @app.route("/subjects/<int:subject_id>/todolist/tasks/<int:task_id>/delete", methods=["POST"])
