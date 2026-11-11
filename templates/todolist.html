@@ -7,13 +7,13 @@ To-Do List
 {% block main %}
 <div class="text-center">
     <a href="{{ url_for('settasks', subject_id=subject_id) }}">
-        <button type="button" class="btn btn-primary btn-lg">Set today's tasks</button>
+        <button type="button" class="btn btn-primary btn-lg">Set task</button>
     </a>
 </div>
 
 <div class="text-center">
     <a href="{{ url_for('viewtasks', subject_id=subject_id) }}">
-        <button type="button" class="btn btn-primary btn-lg">Show today's tasks</button>
+        <button type="button" class="btn btn-primary btn-lg">Show tasks</button>
     </a>
 </div>
 {% endblock %}
